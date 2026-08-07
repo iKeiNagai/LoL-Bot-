@@ -2,5 +2,6 @@ tokens.db
 tokens.db-wal
 tokens.db-shm
 woork.py
-/__pychache__
+/__pycache__
 /components/__pycache__
+.gitignore
