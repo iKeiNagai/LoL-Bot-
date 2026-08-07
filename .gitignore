@@ -1,0 +1,6 @@
+tokens.db
+tokens.db-wal
+tokens.db-shm
+woork.py
+/__pychache__
+/components/__pycache__
