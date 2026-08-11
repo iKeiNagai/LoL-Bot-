@@ -4,8 +4,9 @@ import twitchio
 
 from twitchio import eventsub
 from twitchio.ext import commands
-from config import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID
+from config import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID, RIOT_API_KEY
 from components import *
+from rito import RiotAPI
 
 LOGGER = logging.getLogger("Bot")
 
@@ -25,10 +26,13 @@ class Bot(commands.AutoBot):
             force_subscribe=True,   # Force re-subscribe to all subscriptions on startup to ensure they are still valid
         )
 
+        # Initialize RiotAPI
+        self.rito = RiotAPI(RIOT_API_KEY)
 
     # Setup hook: add all components to the bot
     async def setup_hook(self) -> None:
         await self.add_component(HelloComponent(self))
+        await self.add_component(LeagueComponent(self))
 
     # Fired once the bot has successfully connected and authenticated
     async def event_ready(self) -> None:

@@ -17,8 +17,14 @@ async def setup_database(db: asqlite.Pool) -> tuple[list[tuple[str, str]], list[
         refresh TEXT NOT NULL
     )"""
 
+    query2 = """CREATE TABLE IF NOT EXISTS streamer_puuids(
+        user_id TEXT PRIMARY KEY REFERENCES tokens(user_id) ON DELETE CASCADE,
+        puuid TEXT NOT NULL
+    )"""
+
     async with db.acquire() as connection:
         await connection.execute(query)
+        await connection.execute(query2)
 
         # Fetch all previously saved tokens/subscriptions from the database
         rows: list[sqlite3.Row] = await connection.fetchall("SELECT * FROM tokens")
@@ -43,3 +49,25 @@ async def setup_database(db: asqlite.Pool) -> tuple[list[tuple[str, str]], list[
                 user_id=TWITCH_BOT_ID))
 
     return tokens, subs
+
+
+# Insert or Update League PUUID associated with twitch user id
+async def save_puuid(db: asqlite.Pool, user_id: str, puuid: str) -> None:
+    query = """INSERT INTO streamer_puuids (user_id, puuid)
+        VALUES (?, ?)
+        ON CONFLICT(user_id)
+        DO UPDATE SET puuid = excluded.puuid;
+        """
+
+    async with db.acquire() as connection:
+        await connection.execute(query, (user_id, puuid))
+
+
+# Retrieve League PUUID associated with twitch user id 
+async def get_puuid(db: asqlite.Pool, user_id: str) -> str | None:
+    query="SELECT puuid FROM streamer_puuids WHERE user_id = ?"
+
+    async with db.acquire() as connection:
+        row = await connection.fetchone(query, (user_id))
+
+    return row["puuid"] if row else None
