@@ -9,7 +9,7 @@ class RiotAPI:
 
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.platform = "na1"
+        self.server = "na1"
         self.continent = "americas"
         self._session : aiohttp.ClientSession | None = None 
 
@@ -28,6 +28,23 @@ class RiotAPI:
         if self._session and not self._session.closed:
             await self._session.close()
 
+    @staticmethod
+    def _raise_for_status(status: int) -> None:
+        messages = {
+            400: "Riot API Bad Request",
+            401: "Riot API Unauthorized",
+            403: "Riot API access forbidden",
+            404: "Riot API data not found",
+            415: "Riot API Unsupported Media Type",
+            429: "Riot API rate limit exceeded"    
+        }
+
+        if status in messages:
+            raise RiotAPIError(messages[status])
+
+        if 500 <= status < 600:
+            raise RiotAPIError("Riot API server error")
+
 
     # Look up Riot ID and return account's PUUID
     async def get_puuid(self, game_name: str, tag_line: str) -> str:
@@ -41,10 +58,8 @@ class RiotAPI:
 
         # API request
         async with session.get(url) as response:
-            if response.status == 404:
-                raise RiotAPIError(
-                    f"Player '{game_name}#{tag_line}' not found."
-                )
+            
+            self._raise_for_status(response.status)
 
             # parse and return PUUID
             data = await response.json()
