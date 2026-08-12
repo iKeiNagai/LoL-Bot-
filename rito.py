@@ -64,3 +64,22 @@ class RiotAPI:
             # parse and return PUUID
             data = await response.json()
             return data["puuid"]
+
+
+    # Get league entries for a given PUUID
+    async def get_rank_entries(self, puuid: str) -> list [dict]:
+        session = await self._get_session()
+
+        # Riot API Endpoint
+        url = (
+            f"https://{self.server}.api.riotgames.com/lol/league/v4/"
+            f"entries/by-puuid/{puuid}"
+        )
+
+        # API request
+        async with session.get(url) as response:
+
+            self._raise_for_status(response.status)
+
+            # Return json response
+            return await response.json()

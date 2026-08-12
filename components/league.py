@@ -1,7 +1,7 @@
 from twitchio.ext import commands
 from rito import RiotAPIError
 from database import save_puuid, get_puuid
-
+from formatters import format_rank
 class LeagueComponent(commands.Component):
     def __init__(self, bot):
         self.bot = bot
@@ -41,3 +41,28 @@ class LeagueComponent(commands.Component):
 
         # Confirmation message
         await ctx.reply(f"Linked {game_name}#{tag_line} to this channel.")
+
+
+    "Fetches and displays the Solo/Duo rank for a linked account"
+    @commands.command()
+    async def rank(self, ctx: commands.Context):
+        puuid = await get_puuid(
+                    self.bot.token_database, 
+                    ctx.broadcaster.id
+        )
+
+        # Check PUUID exists
+        if puuid is None:
+            await ctx.reply("No Riot account linked yet - use !set <Name#Tag> first.")
+            return
+
+        try:
+            # Fetch raw league entries from Riot API 
+            rank_rito = await self.bot.rito.get_rank_entries(puuid)
+        except RiotAPIError as exc:
+            # Riot's API err
+            await ctx.reply(str(exc))
+            return
+
+        # Formatted ranked {tier Rank LP}
+        await ctx.reply(format_rank(rank_rito))
