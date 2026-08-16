@@ -86,3 +86,8 @@ class Bot(commands.AutoBot):
             LOGGER.info("Saved token to database for user: %s", resp.user_id)
 
         return resp
+
+    # Close riot session and bot properly
+    async def close(self) -> None:
+        await self.rito.close_session()
+        await super().close()
