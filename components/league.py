@@ -1,7 +1,7 @@
 from twitchio.ext import commands
 from rito import RiotAPIError
 from database import save_puuid, get_puuid
-from formatters import format_rank
+from formatters import format_rank, format_winrate
 class LeagueComponent(commands.Component):
     def __init__(self, bot):
         self.bot = bot
@@ -66,3 +66,27 @@ class LeagueComponent(commands.Component):
 
         # Formatted ranked {tier Rank LP}
         await ctx.reply(format_rank(rank_rito))
+
+
+    @commands.command()
+    async def winrate(self, ctx:commands.Context):
+        puuid = await get_puuid(
+                    self.bot.token_database, 
+                    ctx.broadcaster.id
+        )
+
+        # Check PUUID exists
+        if puuid is None:
+            await ctx.reply("No Riot account linked yet - use !set <Name#Tag> first.")
+            return
+
+        try:
+            # Fetch raw league entries from Riot API
+            rank_rito = await self.bot.rito.get_rank_entries(puuid)
+        except RiotAPIError as exc:
+            await ctx.reply(str(exc))
+            return
+
+        # Formatted winrate
+        await ctx.reply(format_winrate(rank_rito))
+        
