@@ -3,12 +3,14 @@ import asqlite
 import twitchio
 
 from twitchio import eventsub
+from twitchio import web
 from twitchio.ext import commands
-from config import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID, RIOT_API_KEY
+from config import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID, RIOT_API_KEY, AUTH_DOMAIN
 from components import *
 from rito import RiotAPI
 
 LOGGER = logging.getLogger("Bot")
+adapter = web.AiohttpAdapter(domain=AUTH_DOMAIN, port=4343 )
 
 # Core Bot class: handles login, token persistence, and per-broadcaster
 # EventSub subscriptions for chat messages.
@@ -22,6 +24,7 @@ class Bot(commands.AutoBot):
             client_secret=TWITCH_CLIENT_SECRET,
             bot_id=TWITCH_BOT_ID,
             prefix="!",
+            adapter=adapter,
             subscriptions=subs,     # Subscribe to all previously saved subscriptions on startup
             force_subscribe=True,   # Force re-subscribe to all subscriptions on startup to ensure they are still valid
         )
