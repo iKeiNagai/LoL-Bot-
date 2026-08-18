@@ -1,7 +1,7 @@
 from twitchio.ext import commands
 from rito import RiotAPIError
 from database import save_puuid, get_puuid
-from formatters import format_rank, format_winrate, format_level
+from formatters import *
 class LeagueComponent(commands.Component):
     def __init__(self, bot):
         self.bot = bot
@@ -112,6 +112,28 @@ class LeagueComponent(commands.Component):
 
         #
         await ctx.reply(format_level(summoner))
+
+    "Retrieves top 3 mastery champs for linked account"
+    @commands.command()
+    async def mains(self, ctx:commands.Context):
+        puuid = await get_puuid(
+            self.bot.token_database, 
+            ctx.broadcaster.id
+        )
+        
+        # Check PUUID exists
+        if puuid is None:
+            await ctx.reply("No Riot account linked yet - use !set <Name#Tag> first.")
+            return
+
+        try:
+            mains = await self.bot.rito.get_player_topchamps(puuid)
+            champs_ids = await self.bot.static.get_champions_id()
+        except RiotAPIError as exc:
+            await ctx.reply(str(exc))
+            return
+
+        await ctx.reply(format_mains(mains, champs_ids))
 
 
         

@@ -164,4 +164,23 @@ class RiotAPI:
 
             # Return json response
             return await response.json()
+
+    # Get top 3 champion masteries info for given PUUID
+    async def get_player_topchamps(self, puuid: str) -> list [dict]:
+        session = await self._get_session()
+        amount = 3
+
+        # Riot API Endpoint
+        url = (
+            f"https://{self.server}.api.riotgames.com/lol/champion-mastery/v4/"
+            f"champion-masteries/by-puuid/{puuid}/top?count={amount}"
+        )
+
+        # API request
+        async with session.get(url) as response:
+            self._raise_for_status(response.status)
+
+            # Return json response
+            return await response.json()
+
         

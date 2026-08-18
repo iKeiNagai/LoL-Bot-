@@ -47,3 +47,33 @@ def format_level(entry: dict) -> str:
     )
 
     return message
+
+
+def format_mains(mains: list[dict], champs_ids: dict) -> str:
+    formatted_champs = []
+
+    for champ in mains:
+        champ_id = champ["championId"]
+        name = champs_ids.get(champ_id, "unknown champion")
+
+        points = champ["championPoints"]
+        level= champ["championLevel"]
+
+        # Abbreviate mastery points (1.5M, 350k, 900)
+        if points >= 1_000_000:
+            points_str = f"{points/1_000_000:.1f}M"
+        elif points >= 1_000:
+            points_str = f"{points/1_000:.0f}k"
+        else:
+            points_str = str(points)
+
+        # Format individual string
+        formatted_champs.append(
+            f"{name} [Lvl {level} | {points_str}]"
+        )
+
+    message =(
+        " • ".join(formatted_champs)
+    )
+
+    return message
