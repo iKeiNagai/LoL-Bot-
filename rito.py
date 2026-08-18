@@ -80,6 +80,25 @@ class RiotAPI:
         async with session.get(url) as response:
 
             self._raise_for_status(response.status)
+            print(await response.json())
 
             # Return json response
             return await response.json()
+
+    # Get league summoner for given PUUID
+    async def get_player_profile(self, puuid: str) -> dict:
+        session = await self._get_session()
+
+        # Riot API Endpoint
+        url = (
+            f"https://{self.server}.api.riotgames.com/lol/summoner/v4/"
+            f"summoners/by-puuid/{puuid}"
+        )
+
+        # API request
+        async with session.get(url) as response:
+            self._raise_for_status(response.status)
+
+            # Return json response
+            return await response.json()
+        

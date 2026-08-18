@@ -37,3 +37,13 @@ def format_winrate(entries: list[dict]) -> str:
             return message
 
     return "unranked"
+
+# Formats Summoner level
+def format_level(entry: dict) -> str:
+    summoner_level = entry["summonerLevel"]
+
+    message = (
+        f"Level • {summoner_level}"
+    )
+
+    return message
