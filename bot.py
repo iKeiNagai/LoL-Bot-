@@ -7,7 +7,7 @@ from twitchio import web
 from twitchio.ext import commands
 from config import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID, RIOT_API_KEY, AUTH_DOMAIN
 from components import *
-from rito import RiotAPI
+from rito import RiotAPI, DataDragonAPI
 
 LOGGER = logging.getLogger("Bot")
 adapter = web.AiohttpAdapter(domain=AUTH_DOMAIN, port=4343 )
@@ -29,8 +29,9 @@ class Bot(commands.AutoBot):
             force_subscribe=True,   # Force re-subscribe to all subscriptions on startup to ensure they are still valid
         )
 
-        # Initialize RiotAPI
+        # Initialize RiotAPIs
         self.rito = RiotAPI(RIOT_API_KEY)
+        self.static = DataDragonAPI()
 
     # Setup hook: add all components to the bot
     async def setup_hook(self) -> None:
@@ -93,4 +94,5 @@ class Bot(commands.AutoBot):
     # Close riot session and bot properly
     async def close(self) -> None:
         await self.rito.close_session()
+        await self.static.close_session()
         await super().close()
