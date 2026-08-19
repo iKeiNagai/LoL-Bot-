@@ -32,7 +32,9 @@ def format_winrate(entries: list[dict]) -> str:
             winrate = round((wins/total) * 100, 2)
 
             message = (
-                f"Winrate • {winrate}%"
+                f"[wins | {wins}] • "
+                f"[losses | {losses}] • "
+                f"[WR | {winrate}%]"
             )
             return message
 
@@ -74,6 +76,31 @@ def format_mains(mains: list[dict], champs_ids: dict) -> str:
 
     message =(
         " • ".join(formatted_champs)
+    )
+
+    return message
+
+
+def format_last_match_pings(match_data: dict, puuid: str) -> str:
+
+    # Selects participant from match data
+    participant = next(
+        p for p in match_data["info"]["participants"]
+        if p["puuid"] == puuid
+    )
+
+    # Filters pings from participants data
+    selected_keys = {
+        key: value for key, value in participant.items()
+        if key.endswith("Pings") and isinstance(value, int)
+    }
+
+    total_pings = sum(selected_keys.values())
+
+    #print(list(selected_keys.keys()))
+
+    message = (
+        f"{total_pings} pings last game"
     )
 
     return message

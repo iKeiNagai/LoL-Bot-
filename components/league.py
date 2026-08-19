@@ -135,5 +135,32 @@ class LeagueComponent(commands.Component):
 
         await ctx.reply(format_mains(mains, champs_ids))
 
+    "Retrieves and calculates last game's pings for a linked account"
+    @commands.command()
+    async def pings(self, ctx: commands.Context):
+        puuid = await get_puuid(
+            self.bot.token_database, 
+            ctx.broadcaster.id
+        )
+        
+        # Check PUUID exists
+        if puuid is None:
+            await ctx.reply("No Riot account linked yet - use !set <Name#Tag> first.")
+            return
+
+        try:
+            match_id = await self.bot.rito.get_match_ids(puuid)
+
+            if not match_id:
+                await ctx.reply("No recent ranked matches found.")
+                return
+            
+            last_match_id = match_id[0]
+            match_data = await self.bot.rito.get_match_info(last_match_id)
+        except RiotAPIError as exc:
+            await ctx.reply(str(exc))
+            return
+
+        await ctx.reply(format_last_match_pings(match_data, puuid))
 
         
