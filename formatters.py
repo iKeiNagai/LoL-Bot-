@@ -32,15 +32,15 @@ def format_winrate(entries: list[dict]) -> str:
             winrate = round((wins/total) * 100, 2)
 
             message = (
-                f"[wins | {wins}] • "
-                f"[losses | {losses}] • "
-                f"[WR | {winrate}%]"
+                f"{wins}W • "
+                f"{losses}L • "
+                f"{winrate}%"
             )
             return message
 
     return "unranked"
 
-# Formats Summoner level
+# Formats Summoner level (Level ##)
 def format_level(entry: dict) -> str:
     summoner_level = entry["summonerLevel"]
 
@@ -50,7 +50,7 @@ def format_level(entry: dict) -> str:
 
     return message
 
-
+# Formats user main champs (Champ [lvl ## | #### ])
 def format_mains(mains: list[dict], champs_ids: dict) -> str:
     formatted_champs = []
 
@@ -80,7 +80,7 @@ def format_mains(mains: list[dict], champs_ids: dict) -> str:
 
     return message
 
-
+# Format last match pings amount (# pings last match)
 def format_last_match_pings(match_data: dict, puuid: str) -> str:
 
     # Selects participant from match data
@@ -101,6 +101,34 @@ def format_last_match_pings(match_data: dict, puuid: str) -> str:
 
     message = (
         f"{total_pings} pings last game"
+    )
+
+    return message
+
+# Formats last match details (Outcome + Champ k/d/a + ##CS + ##KDA + ##%KP)
+def format_last_match(match_data: dict, puuid: str) -> str:
+
+    # Selects participant from match data
+    participant = next(
+        p for p in match_data["info"]["participants"]
+        if p["puuid"] == puuid
+    )
+
+    kills = participant["kills"]
+    deaths = participant["deaths"]
+    assist = participant["assists"]
+    champion = participant["championName"]
+    cs = participant["totalMinionsKilled"] + participant["neutralMinionsKilled"]
+    kda = participant["challenges"]["kda"]
+    kp = round(participant["challenges"]["killParticipation"] * 100,2)
+
+    is_win = participant["win"]
+    outcome = "Win" if is_win else "Loss"
+
+
+    message = (
+        f"{outcome} • {champion} {kills}/{deaths}/{assist} • "
+        f"{cs} CS • {kda} KDA • {kp}% KP"
     )
 
     return message
