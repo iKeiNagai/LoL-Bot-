@@ -183,4 +183,38 @@ class RiotAPI:
             # Return json response
             return await response.json()
 
-        
+    # Get list of match ids for given PUUID
+    async def get_match_ids(self, puuid: str) -> list:
+        session = await self._get_session()
+        type = "ranked"
+        count = 20
+
+        # Riot API Endpoint
+        url = (
+            f"https://{self.continent}.api.riotgames.com/lol/match/v5/"
+            f"matches/by-puuid/{puuid}/ids?type={type}&start=0&count={count}"
+        )
+
+        # API request
+        async with session.get(url) as response:
+            self._raise_for_status(response.status)
+
+            return await response.json()
+    
+    
+    async def get_match_info(self, match_id: str) -> dict:
+        session = await self._get_session()
+
+        # Riot API Endpoint
+        url = (
+            f"https://{self.continent}.api.riotgames.com/lol/match/v5/"
+            f"matches/{match_id}"
+        )
+
+        # API request
+        async with session.get(url) as response:
+            self._raise_for_status(response.status)
+
+            
+            return await response.json()
+
