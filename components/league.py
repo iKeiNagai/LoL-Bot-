@@ -191,4 +191,55 @@ class LeagueComponent(commands.Component):
             return
 
         await ctx.reply(format_last_match(match_data, puuid))
+
+    "Check current win/loss streak for linked account"
+    @commands.command()
+    async def streak(self, ctx: commands.Context):
+        puuid = await get_puuid(
+            self.bot.token_database, 
+            ctx.broadcaster.id
+        )
+        
+        # Check PUUID exists
+        if puuid is None:
+            await ctx.reply("No Riot account linked yet - use !set <Name#Tag> first.")
+            return
+
+        try:
+            match_ids = await self.bot.rito.get_match_ids(puuid)
+
+            if not match_ids:
+                await ctx.reply("No recent ranked matches found.")
+                return
+
+            streak = 0
+            streak_type = None
+
+            # Iterates through the matches new to old
+            for id in match_ids:
+                match_data = await self.bot.rito.get_match_info(id)
+
+                participant = next(
+                    p for p in match_data["info"]["participants"]
+                    if p["puuid"] == puuid
+                )
+
+                match_result = "win" if participant["win"] else "loss"
+                remake = participant["gameEndedInEarlySurrender"]
+
+                # Process streak logic (ignores remakes)
+                if not remake:
+                    if streak_type is None:
+                        streak_type = match_result
+                        streak = 1
+                    elif match_result == streak_type:
+                        streak += 1
+                    else:
+                        break
+
+        except RiotAPIError as exc:
+            await ctx.reply(str(exc))
+            return
+
+        await ctx.reply(format_streak(streak_type, streak))
         

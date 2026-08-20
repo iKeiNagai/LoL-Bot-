@@ -187,7 +187,7 @@ class RiotAPI:
     async def get_match_ids(self, puuid: str) -> list:
         session = await self._get_session()
         type = "ranked"
-        count = 20
+        count = 15
 
         # Riot API Endpoint
         url = (

@@ -132,3 +132,20 @@ def format_last_match(match_data: dict, puuid: str) -> str:
     )
 
     return message
+
+# Formats streaks (## Win/Loss)
+def format_streak(streak_type: str, streak: int) -> str:
+
+    # Makes it plural if there's more than 1 
+    if streak > 1 and streak_type == "win":
+        streak_type += "s 🔥"
+    if streak > 1 and streak_type == "loss":
+        streak_type += "es 💀"
+    else:
+        streak_type = streak_type
+        
+    message = (
+        f"{streak} {streak_type}"
+    )
+
+    return message
